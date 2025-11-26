@@ -299,7 +299,7 @@ function modifyCode(text) {
 					}
 				}
 				return this.closeInput();
-			case ".modules":
+			case ".gamemodes":
 				chatString = "Module List\\n";
 				for(const [name, module] of Object.entries(modules)) chatString += "\\n" + name;
 				game.chat.addChat({text: chatString});
