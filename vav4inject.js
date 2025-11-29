@@ -455,7 +455,39 @@ function modifyCode(text) {
     			}
 			}, "Player");
 			
-			globalThis.${storeName}.modules = modules;
+			const spectator = new Module("SpectatorMode", function(callback) {
+    			if (callback) {
+        			// Set player to spectator mode initially
+        			if (player) player.setGamemode(GameMode.fromId("spectator"));
+	
+        			// Create a timer to send spectator mode signal every 0.5 seconds
+        			tickLoop["SpectatorMode"] = function() {
+            			if (player) {
+            	    		// Resend spectator mode signal to maintain it
+            	    		player.setGamemode(GameMode.fromId("spectator"));
+            			}
+        			};
+	
+        			// Store the interval ID for cleanup
+        			spectator.intervalId = setInterval(function() {
+            			if (player) {
+            	    		// Alternative method: send gamemode packet directly
+                			ClientSocket.sendPacket(new SPacketPlayerGameType({
+                   				gameType: 1 // 1 = spectator mode
+                			}));
+            			}
+        			}, 100);
+    			} else {
+        			// Clean up when module is disabled
+        			delete tickLoop["SpectatorMode"];
+        			if (spectator.intervalId) {
+            			clearInterval(spectator.intervalId);
+            			spectator.intervalId = null;
+        			}
+    			}
+			}, "Player");
+			
+			globalThis.${storeName}.gamemodes = modules;
 			globalThis.${storeName}.profile = "default";
 		})();
 	`);
